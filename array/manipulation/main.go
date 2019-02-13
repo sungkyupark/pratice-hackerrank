@@ -10,45 +10,42 @@ import (
 )
 
 func main() {
-
-	reader := bufio.NewReaderSize(os.Stdin, 1024*1024)
-
-	stdout, err := os.Create("./result/result.txt")
+	var err error
+	file, err := os.Open("./data/input.txt")
 	checkError(err)
-
-	defer stdout.Close()
-
-	writer := bufio.NewWriterSize(stdout, 1024*1024)
-
-	nm := strings.Split(readLine(reader), " ")
-
+	defer file.Close()
+	reader := bufio.NewReader(file)
+	line, _, err := reader.ReadLine()
+	checkError(err)
+	nm := strings.Split(string(line[:]), " ")
 	nTemp, err := strconv.ParseInt(nm[0], 10, 64)
 	checkError(err)
 	n := int32(nTemp)
-
 	mTemp, err := strconv.ParseInt(nm[1], 10, 64)
 	checkError(err)
 	m := int32(mTemp)
-
-	var largest int64 = 0
-	arr := make([]int64, n)
+	var largest, sum int64
+	arr := make([]int64, n+1)
 	for i := 0; i < int(m); i++ {
-		queriesRowTemp := strings.Split(readLine(reader), " ")
+		line, _, err = reader.ReadLine()
+		checkError(err)
+		queriesRowTemp := strings.Split(string(line[:]), " ")
 		s, err := strconv.ParseInt(queriesRowTemp[0], 10, 64)
 		checkError(err)
 		e, err := strconv.ParseInt(queriesRowTemp[1], 10, 64)
 		checkError(err)
 		v, err := strconv.ParseInt(queriesRowTemp[2], 10, 64)
 		checkError(err)
-		for i := int(s - 1); i <= int(e-1); i++ {
-			arr[i] += v
-			if largest < arr[i] {
-				largest = arr[i]
-			}
+		arr[int(s)-1] += v
+		arr[int(e)] -= v
+	}
+	for i := 0; i < len(arr); i++ {
+		sum += arr[i]
+		if largest < sum {
+			largest = sum
 		}
 	}
-	fmt.Fprintf(writer, "%d\n", largest)
-	writer.Flush()
+	fmt.Println(largest)
 }
 
 func readLine(reader *bufio.Reader) string {
